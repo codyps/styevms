@@ -1,6 +1,3 @@
-//! Note: this does not manage `ip` the same way as the article, and the `ip` could really be
-//! dropped entirely.
-
 const STACK_MAX: usize = 256;
 
 pub struct Vm {
@@ -55,26 +52,17 @@ impl Vm {
         self.stack[self.stack_top]
     }
 
-    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8> {
-        if bytecode.is_empty() {
-            None
-        } else {
-            let a = bytecode[0];
-            *bytecode = &bytecode[1..];
-            self.ip += 1;
-            Some(a)
-        }
-    }
-
-    pub fn interp(&mut self, mut bytecode: &[u8]) -> Result<(), Error> {
+    pub fn interp(&mut self, bytecode: &[u8]) -> Result<(), Error> {
         self.reset();
 
         loop {
-            let insv = self.next_i(&mut bytecode).unwrap();
+            let insv = bytecode[self.ip];
+            self.ip += 1;
 
             match num::FromPrimitive::from_u8(insv) {
                 Some(Op::PushI) => {
-                    let arg = self.next_i(&mut bytecode).unwrap();
+                    let arg = bytecode[self.ip];
+                    self.ip += 1;
                     self.stack_push(arg as u64);
                 }
                 Some(Op::Add) => {
