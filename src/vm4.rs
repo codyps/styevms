@@ -1,6 +1,3 @@
-//! Note: this does not manage `ip` the same way as the article, and the `ip` could really be
-//! dropped entirely.
-
 const REGISTER_NUM: usize = 16;
 
 #[derive(Default)]
@@ -59,6 +56,7 @@ impl Inst {
     }
 }
 
+// tt-muncher style macro
 #[macro_export]
 macro_rules! vm4_asm {
     ( @a [ $($n:tt)* ] -> DONE ; $($e:tt)* ) => {
@@ -130,23 +128,13 @@ impl Vm {
         *self = Self::default();
     }
 
-    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8> {
-        if bytecode.is_empty() {
-            None
-        } else {
-            let a = bytecode[0];
-            *bytecode = &bytecode[1..];
-            self.ip += 1;
-            Some(a)
-        }
-    }
-
-    pub fn interp(&mut self, mut bytecode: &[u8]) -> Result<(), Error> {
+    pub fn interp(&mut self, bytecode: &[u8]) -> Result<(), Error> {
         self.reset();
 
         loop {
-            let ins1 = self.next_i(&mut bytecode).unwrap();
-            let ins2 = self.next_i(&mut bytecode).unwrap();
+            let ins1 = bytecode[self.ip];
+            let ins2 = bytecode[self.ip + 1];
+            self.ip += 2;
 
             let insv = Inst::from_slice([ins1, ins2]);
 
