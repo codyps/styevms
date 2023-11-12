@@ -1,5 +1,5 @@
 //! https://badootech.badoo.com/home-grown-bytecode-interpreters-51e12d59b25c
-extern crate num;
+//! https://archive.ph/4ru7v
 #[macro_use]
 extern crate num_derive;
 

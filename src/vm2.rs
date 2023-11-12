@@ -1,14 +1,13 @@
 //! Note: this does not manage `ip` the same way as the article, and the `ip` could really be
 //! dropped entirely.
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Default)]
 pub struct Vm {
     accum: u64,
     ip: usize,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-#[derive(ToPrimitive,FromPrimitive)]
+#[derive(Debug, PartialEq, Eq, ToPrimitive, FromPrimitive)]
 pub enum Op {
     Done = 0,
     Inc = 1,
@@ -22,24 +21,13 @@ pub enum Error {
     UnknownOpcode,
 }
 
-impl Default for Vm {
-    fn default() -> Self {
-        Self {
-            accum: 0,
-            ip: 0,
-        }
-    }
-}
-
 impl Vm {
-    pub fn reset(&mut self)
-    {
+    pub fn reset(&mut self) {
         *self = Self::default();
     }
 
-    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8>
-    {
-        if bytecode.len() == 0 {
+    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8> {
+        if bytecode.is_empty() {
             None
         } else {
             let a = bytecode[0];
@@ -49,9 +37,7 @@ impl Vm {
         }
     }
 
-    pub fn interp(&mut self, mut bytecode: &[u8])
-        -> Result<(), Error>
-    {
+    pub fn interp(&mut self, mut bytecode: &[u8]) -> Result<(), Error> {
         self.ip = 0;
         loop {
             let insv = self.next_i(&mut bytecode).unwrap();
@@ -81,14 +67,19 @@ fn t1() {
     use num::ToPrimitive;
     let mut vm = Vm::default();
 
-    assert_eq!(vm.interp(&[
-        Op::Inc.to_u8().unwrap(),
-        Op::AddI.to_u8().unwrap(), 50,
-        Op::SubI.to_u8().unwrap(), 20,
-        Op::Dec.to_u8().unwrap(),
-        Op::Dec.to_u8().unwrap(),
-        Op::Done.to_u8().unwrap(),
-    ]), Ok(()));
+    assert_eq!(
+        vm.interp(&[
+            Op::Inc.to_u8().unwrap(),
+            Op::AddI.to_u8().unwrap(),
+            50,
+            Op::SubI.to_u8().unwrap(),
+            20,
+            Op::Dec.to_u8().unwrap(),
+            Op::Dec.to_u8().unwrap(),
+            Op::Done.to_u8().unwrap(),
+        ]),
+        Ok(())
+    );
 
     assert_eq!(vm.accum, 1 + 50 - 20 - 1 - 1);
 }

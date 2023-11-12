@@ -3,16 +3,16 @@
 
 const REGISTER_NUM: usize = 16;
 
+#[derive(Default)]
 pub struct Vm {
     ip: usize,
 
-    reg: [u64;REGISTER_NUM],
+    reg: [u64; REGISTER_NUM],
 
     result: u64,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-#[derive(ToPrimitive,FromPrimitive)]
+#[derive(Debug, PartialEq, Eq, ToPrimitive, FromPrimitive)]
 pub enum Op {
     Done = 0,
     LoadI = 1,
@@ -29,27 +29,17 @@ pub enum Error {
     DivByZero,
 }
 
-impl Default for Vm {
-    fn default() -> Self {
-        Self {
-            ip: 0,
-            reg: [0u64;REGISTER_NUM],
-            result: 0,
-        }
-    }
-}
-
 struct Inst {
-   c: [u8;2], 
+    c: [u8; 2],
 }
 
 impl Inst {
-    fn from_slice(c: [u8;2]) -> Inst {
-        Self { c: c }
+    fn from_slice(c: [u8; 2]) -> Inst {
+        Self { c }
     }
 
     fn op(&self) -> u8 {
-        ((self.c[0] & 0xF0) >> 4)
+        (self.c[0] & 0xF0) >> 4
     }
 
     fn reg0(&self) -> usize {
@@ -136,14 +126,12 @@ macro_rules! vm4_asm {
 }
 
 impl Vm {
-    pub fn reset(&mut self)
-    {
+    pub fn reset(&mut self) {
         *self = Self::default();
     }
 
-    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8>
-    {
-        if bytecode.len() == 0 {
+    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8> {
+        if bytecode.is_empty() {
             None
         } else {
             let a = bytecode[0];
@@ -153,9 +141,7 @@ impl Vm {
         }
     }
 
-    pub fn interp(&mut self, mut bytecode: &[u8])
-        -> Result<(), Error>
-    {
+    pub fn interp(&mut self, mut bytecode: &[u8]) -> Result<(), Error> {
         self.reset();
 
         loop {
@@ -202,19 +188,22 @@ fn t1() {
     use num::ToPrimitive;
     let mut vm = Vm::default();
 
-    assert_eq!(vm.interp(
-        &vm4_asm!(
-            LOADI 0, 3;
-            LOADI 1, 5;
-            ADD 0, 1, 2;
-            LOADI 3, 6;
-            MUL 2, 3, 4;
-            DIV 4, 1, 5;
-            SUB 5, 0, 6;
-            MOVRES 6;
-            DONE;
-        )[..]
-    ), Ok(()));
+    assert_eq!(
+        vm.interp(
+            &vm4_asm!(
+                LOADI 0, 3;
+                LOADI 1, 5;
+                ADD 0, 1, 2;
+                LOADI 3, 6;
+                MUL 2, 3, 4;
+                DIV 4, 1, 5;
+                SUB 5, 0, 6;
+                MOVRES 6;
+                DONE;
+            )[..]
+        ),
+        Ok(())
+    );
 
     assert_eq!(vm.result, ((3 + 5) * 6) / 5 - 3);
 }
