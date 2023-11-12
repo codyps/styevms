@@ -23,30 +23,23 @@ impl Vm {
         *self = Self::default();
     }
 
-    fn next_i(&mut self, bytecode: &[u8]) -> Option<u8> {
-        if bytecode.is_empty() {
-            None
-        } else {
-            let a = bytecode[self.ip];
-            self.ip += 1;
-            Some(a)
-        }
-    }
-
     pub fn interp(&mut self, bytecode: &[u8]) -> Result<(), Error> {
         self.ip = 0;
         loop {
-            let insv = self.next_i(bytecode).unwrap();
+            let insv = bytecode[self.ip];
+            self.ip += 1;
 
             match num::FromPrimitive::from_u8(insv) {
                 Some(Op::Inc) => self.accum += 1,
                 Some(Op::Dec) => self.accum -= 1,
                 Some(Op::AddI) => {
-                    let arg = self.next_i(bytecode).unwrap();
+                    let arg = bytecode[self.ip];
+                    self.ip += 1;
                     self.accum += arg as u64;
                 }
                 Some(Op::SubI) => {
-                    let arg = self.next_i(bytecode).unwrap();
+                    let arg = bytecode[self.ip];
+                    self.ip += 1;
                     self.accum -= arg as u64;
                 }
                 Some(Op::Done) => break,
