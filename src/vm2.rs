@@ -1,6 +1,3 @@
-//! Note: this does not manage `ip` the same way as the article, and the `ip` could really be
-//! dropped entirely.
-
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct Vm {
     accum: u64,
@@ -26,31 +23,30 @@ impl Vm {
         *self = Self::default();
     }
 
-    fn next_i(&mut self, bytecode: &mut &[u8]) -> Option<u8> {
+    fn next_i(&mut self, bytecode: &[u8]) -> Option<u8> {
         if bytecode.is_empty() {
             None
         } else {
-            let a = bytecode[0];
-            *bytecode = &bytecode[1..];
+            let a = bytecode[self.ip];
             self.ip += 1;
             Some(a)
         }
     }
 
-    pub fn interp(&mut self, mut bytecode: &[u8]) -> Result<(), Error> {
+    pub fn interp(&mut self, bytecode: &[u8]) -> Result<(), Error> {
         self.ip = 0;
         loop {
-            let insv = self.next_i(&mut bytecode).unwrap();
+            let insv = self.next_i(bytecode).unwrap();
 
             match num::FromPrimitive::from_u8(insv) {
                 Some(Op::Inc) => self.accum += 1,
                 Some(Op::Dec) => self.accum -= 1,
                 Some(Op::AddI) => {
-                    let arg = self.next_i(&mut bytecode).unwrap();
+                    let arg = self.next_i(bytecode).unwrap();
                     self.accum += arg as u64;
                 }
                 Some(Op::SubI) => {
-                    let arg = self.next_i(&mut bytecode).unwrap();
+                    let arg = self.next_i(bytecode).unwrap();
                     self.accum -= arg as u64;
                 }
                 Some(Op::Done) => break,
